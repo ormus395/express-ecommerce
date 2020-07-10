@@ -1,68 +1,33 @@
-const fs = require("fs");
-const path = require("path");
+const { Sequelize, Model, DataTypes } = require("sequelize");
+const database = require("../util/database");
 
-const p = path.join(
-  path.dirname(process.mainModule.filename),
-  "data",
-  "products.json"
-);
+const Product = database.define("product", {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    allowNull: false,
+    primaryKey: true,
+  },
 
-const getProductsFromFile = (cb) => {
-  fs.readFile(p, (err, fileContent) => {
-    if (err) {
-      cb([]);
-    } else {
-      cb(JSON.parse(fileContent));
-    }
-  });
-};
+  title: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
 
-module.exports = class Product {
-  constructor(title, imageUrl, description, price) {
-    this.title = title;
-    this.imageUrl = imageUrl;
-    this.description = description;
-    this.price = parseFloat(price);
-  }
+  price: {
+    type: DataTypes.DOUBLE,
+    allowNull: false,
+  },
 
-  save() {
-    this.id = Math.random().toString();
-    getProductsFromFile((products) => {
-      products.push(this);
-      fs.writeFile(p, JSON.stringify(products), (err) => {
-        console.log(err);
-      });
-    });
-  }
+  description: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
 
-  static fetchAll(cb) {
-    getProductsFromFile(cb);
-  }
+  imageUrl: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+});
 
-  static findById(id, cb) {
-    getProductsFromFile((products) => {
-      let product = products.find((product) => product.id === id);
-      cb(product);
-    });
-  }
-
-  static editProduct(id, updatedProductInfo, cb) {
-    fs.readFile(p, (err, data) => {
-      let products = JSON.parse(data);
-      let productIndex = products.findIndex((prod) => prod.id === id);
-
-      if (productIndex > -1) {
-        let product = products[productIndex];
-        let updatedProduct = Object.assign(product, updatedProductInfo);
-        products[productIndex] = updatedProduct;
-
-        fs.writeFile(p, JSON.stringify(products), (err) => {
-          if (err) console.log(err);
-          cb();
-        });
-      } else {
-        console.log("Something went wrong");
-      }
-    });
-  }
-};
+module.exports = Product;

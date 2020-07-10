@@ -1,6 +1,45 @@
 <%- include('../includes/head.ejs') %>
+    <style>
+        .cart {
+            display: flex;
+        }
+
+        article {
+            border: 1px solid black;
+        }
+    </style>
     </head>
 
     <body>
         <%- include('../includes/navigation.ejs') %>
+        <main>
+            <% if(cart.productList.length > 0) { %>
+                <section>
+                    <h3>Total Price: <%= cart.totalPrice %></h3>
+                </section>
+                <ul>
+                    <% for (let product of cart.productList) { %>
+                        <li>
+                            <p>
+                                <%= product.title %>: <%= product.cartItem.quantity %>
+                            </p>
+                            <form action="/cart-delete-item" method="POST">
+                                <input type="hidden" name="id" value="<%= product.id %>">
+                                <button class="btn">
+                                    Remove
+                                </button>
+                            </form>
+                        </li>
+                    <% } %>
+                </ul>
+                <form action="/create-order" method="POST">
+                    <button class="btn">
+                        Order Now!
+                    </button>
+                </form>
+                
+            <% } else { %>
+                <h3>No products in Cart</h3>
+            <% }; %>
+        </main>
         <%- include('../includes/end.ejs') %>

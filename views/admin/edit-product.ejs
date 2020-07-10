@@ -24,7 +24,7 @@
             <label for="description">Description</label>
             <textarea name="description" id="description" rows="5"><%= product.description %></textarea>
         </div>
-
+        <input type="hidden" name="id" value="<%= product.id %>">
         <button class="btn" type="submit">Save</button>
     </form>
 </main>
