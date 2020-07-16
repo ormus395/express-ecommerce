@@ -2,7 +2,8 @@
 const path = require("path");
 const express = require("express");
 const bodyParser = require("body-parser");
-
+const session = require("express-session");
+const SessionStore = require("connect-session-sequelize")(session.Store);
 //controller imports
 // error controller handles 404's for now
 const errorController = require("./controllers/error");
@@ -36,18 +37,20 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // to send a folder for the browser to access
 app.use(express.static(path.join(__dirname, "public")));
 
+// session middlware used to maintain user persistence on the server
+app.use(
+  session({
+    secret: "doge has no idea",
+    store: new SessionStore({ db: db }),
+    resave: false,
+    saveUninitialized: false,
+  })
+);
 // app.use uses any middleware,
 // middleware are functions used by express before or after any
 // request event from the browser
 // This one searches db for a user
-app.use((req, res, next) => {
-  User.findByPk(1)
-    .then((user) => {
-      req.user = user;
-      next();
-    })
-    .catch((err) => console.log(err));
-});
+// app.use((req, res, next) => {});
 
 app.use("/admin", adminRoutes);
 app.use(shopRoutes);
