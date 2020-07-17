@@ -49,8 +49,23 @@ app.use(
 // app.use uses any middleware,
 // middleware are functions used by express before or after any
 // request event from the browser
-// This one searches db for a user
-// app.use((req, res, next) => {});
+
+// add the sequelize user to the req object using the session data
+app.use((req, res, next) => {
+  if (!req.session.user) {
+    next();
+  } else {
+    User.findByPk(req.session.user.id)
+      .then((user) => {
+        req.user = user;
+        next();
+      })
+      .catch((err) => {
+        console.log("Error");
+        next(err);
+      });
+  }
+});
 
 app.use("/admin", adminRoutes);
 app.use(shopRoutes);

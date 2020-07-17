@@ -1,5 +1,6 @@
 const Product = require("../models/product");
 const Cart = require("../models/cart");
+const User = require("../models/user");
 
 exports.getProducts = (req, res, next) => {
   Product.findAll()
@@ -15,8 +16,6 @@ exports.getProducts = (req, res, next) => {
       console.log(err);
       res.send("500 server error");
     });
-  /*
-   */
 };
 
 exports.getProduct = (req, res, next) => {
@@ -114,6 +113,7 @@ exports.postCart = (req, res, next) => {
 
 exports.deleteFromCart = (req, res, next) => {
   let id = req.body.id;
+
   req.user
     .getCart()
     .then((cart) => {
@@ -135,16 +135,9 @@ exports.deleteFromCart = (req, res, next) => {
     });
 };
 
-exports.getOrders = (req, res, next) => {
-  res.render("shop/orders", {
-    path: "/orders",
-    pageTitle: "Your Orders",
-    isAuthenticated: req.session.isLoggedIn,
-  });
-};
-
 exports.postOrder = (req, res, next) => {
   let fetchedCart;
+
   req.user
     .getCart()
     .then((cart) => {

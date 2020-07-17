@@ -1,4 +1,5 @@
 const Product = require("../models/product");
+const User = require("../models/user");
 
 exports.getAddProduct = (req, res, next) => {
   res.render("admin/add-product", {
@@ -13,6 +14,7 @@ exports.postAddProduct = (req, res, next) => {
   const imageUrl = req.body.imageUrl;
   const price = req.body.price;
   const description = req.body.description;
+
   req.user
     .createProduct({
       title: title,
@@ -33,6 +35,7 @@ exports.postAddProduct = (req, res, next) => {
 exports.getEditProduct = (req, res, next) => {
   const prodId = req.params.productId;
   console.log(prodId);
+
   req.user
     .getProducts({
       where: { id: prodId },
