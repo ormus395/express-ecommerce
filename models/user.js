@@ -10,6 +10,7 @@ const User = database.define("user", {
   },
   name: DataTypes.STRING,
   email: DataTypes.STRING,
+  password: DataTypes.STRING,
 });
 
 module.exports = User;
