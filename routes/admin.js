@@ -3,20 +3,29 @@ const path = require("path");
 const express = require("express");
 
 const adminController = require("../controllers/admin");
+const { routeAuth } = require("../middleware/isAuth");
 
 const router = express.Router();
 
 // /admin/add-product => GET
-router.get("/add-product", adminController.getAddProduct);
+router.get("/add-product", routeAuth, adminController.getAddProduct);
 // /admin/add-product => POST
-router.post("/add-product", adminController.postAddProduct);
+router.post("/add-product", routeAuth, adminController.postAddProduct);
 
 // /admin/products => GET
-router.get("/products", adminController.getProducts);
+router.get("/products", routeAuth, adminController.getProducts);
 
-router.get("/edit-product/:productId", adminController.getEditProduct);
-router.post("/edit-product/:productId", adminController.postEditProduct);
+router.get(
+  "/edit-product/:productId",
+  routeAuth,
+  adminController.getEditProduct
+);
+router.post(
+  "/edit-product/:productId",
+  routeAuth,
+  adminController.postEditProduct
+);
 
-router.post("/delete-product/", adminController.deleteProduct);
+router.post("/delete-product/", routeAuth, adminController.deleteProduct);
 
 module.exports = router;

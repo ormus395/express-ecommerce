@@ -4,6 +4,8 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const session = require("express-session");
 const SessionStore = require("connect-session-sequelize")(session.Store);
+const csurf = require("csurf");
+const flash = require("connect-flash");
 //controller imports
 // error controller handles 404's for now
 const errorController = require("./controllers/error");
@@ -17,7 +19,8 @@ const app = express();
 // set the view engine
 app.set("view engine", "ejs");
 app.set("views", "views");
-
+// csrfProtection is an express middleware that generates a random token to validate post request from forms
+const csrfProtection = csurf();
 // import the routes
 const adminRoutes = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
@@ -46,6 +49,8 @@ app.use(
     saveUninitialized: false,
   })
 );
+app.use(csrfProtection);
+app.use(flash());
 // app.use uses any middleware,
 // middleware are functions used by express before or after any
 // request event from the browser
@@ -67,6 +72,12 @@ app.use((req, res, next) => {
   }
 });
 
+app.use((req, res, next) => {
+  res.locals.isAuthenticated = req.session.isLoggedIn;
+  res.locals.csrfToken = req.csrfToken();
+  next();
+});
+
 app.use("/admin", adminRoutes);
 app.use(shopRoutes);
 app.use(authRoutes);
@@ -86,19 +97,6 @@ Order.belongsToMany(Product, { through: OrderItem });
 //db.sync({ force: true })
 db.sync()
   .then((result) => {
-    return User.findByPk(1);
-  })
-  .then((user) => {
-    if (!user) {
-      return User.create({ name: "Jarec", email: "test@test.com" });
-    } else {
-      return Promise.resolve(user);
-    }
-  })
-  .then((user) => {
-    return user.createCart();
-  })
-  .then(() => {
     app.listen(3000, () => {
       console.log("Server started");
     });

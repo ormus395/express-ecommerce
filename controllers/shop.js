@@ -19,29 +19,33 @@ exports.getProducts = (req, res, next) => {
 };
 
 exports.getProduct = (req, res, next) => {
-  console.log("Get product controller");
   const prodId = req.params.productId;
-  console.log("product id", prodId);
   Product.findAll({ where: { id: prodId } })
     .then((result) => {
       let product = result[0].dataValues;
+      console.log(product);
       res.render("shop/product-detail", {
         product: product,
         pageTitle: "Product Details",
         path: "/products/" + prodId,
-        isAuthenticated: req.session.isLoggedIn,
       });
     })
     .catch((err) => console.log(err));
 };
 
 exports.getIndex = (req, res, next) => {
+  let message = req.flash("success");
+  if (message) {
+    message = message[0];
+  } else {
+    message = false;
+  }
   Product.findAll().then((products) => {
     res.render("shop/index", {
       prods: products,
       pageTitle: "Shop",
       path: "/",
-      isAuthenticated: req.session.isLoggedIn,
+      successMessage: message,
     });
   });
 };
@@ -57,7 +61,6 @@ exports.getCart = (req, res, next) => {
         cart: { productList: products, totalPrice: 0 },
         pageTitle: "Cart",
         path: "/cart",
-        isAuthenticated: req.session.isLoggedIn,
       });
     })
     .catch((err) => {
@@ -173,7 +176,6 @@ exports.getOrders = (req, res, next) => {
         path: "/orders",
         pageTitle: "Your Orders",
         orders: result,
-        isAuthenticated: req.session.isLoggedIn,
       });
     })
     .catch((err) => {
