@@ -58,14 +58,16 @@ exports.postEditProduct = (req, res, next) => {
 
   Product.findByPk(prodId)
     .then((result) => {
+      if (req.user.id !== result.userId) {
+        return res.redirect("/");
+      }
       result.title = updatedTitle;
       result.price = updatedPrice;
       result.imageUrl = updatedImage;
       result.description = updatedDescription;
-      return result.save();
-    })
-    .then((result) => {
-      res.redirect("/admin/products");
+      return result.save().then((result) => {
+        res.redirect("/admin/products");
+      });
     })
     .catch((err) => {
       console.log(err);
@@ -76,6 +78,7 @@ exports.deleteProduct = (req, res, next) => {
   Product.destroy({
     where: {
       id: req.body.id,
+      userId: req.user.id,
     },
   })
     .then((result) => {
