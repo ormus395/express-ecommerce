@@ -1,6 +1,8 @@
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
 const { Op } = require("sequelize");
+const { validationResult } = require("express-validator/check");
+
 const sgMail = require("../util/mailer");
 const User = require("../models/user");
 
@@ -108,7 +110,18 @@ exports.postSignup = (req, res, next) => {
   const name = req.body.name;
   const email = req.body.email;
   const password = req.body.confirmPassword;
+  const error = validationResult(req);
+  const message = error.array()[0].msg;
 
+  console.log(error);
+  if (!error.isEmpty()) {
+    return res.status(422).render("auth/signup", {
+      path: "/signup",
+      pageTitle: "Signup",
+      errorMessage: message,
+      successMessage: false,
+    });
+  }
   bcrypt.hash(password, 12).then((hashed) => {
     User.findOrCreate({
       where: { email: email },
