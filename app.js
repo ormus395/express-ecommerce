@@ -6,10 +6,6 @@ const session = require("express-session");
 const SessionStore = require("connect-session-sequelize")(session.Store);
 const csurf = require("csurf");
 const flash = require("connect-flash");
-const mailKey = require("./keys/mailer");
-const sgMail = require("@sendgrid/mail");
-
-sgMail.setApiKey(mailKey);
 
 //controller imports
 // error controller handles 404's for now
@@ -102,15 +98,6 @@ Order.belongsToMany(Product, { through: OrderItem });
 //db.sync({ force: true })
 db.sync()
   .then((result) => {
-    const msg = {
-      to: "ormus395@gmail.com",
-      from: "jarecturner@gmail.com",
-      subject: "Sending with Twilio SendGrid is Fun",
-      text: "and easy to do anywhere, even with Node.js",
-      html: "<strong>and easy to do anywhere, even with Node.js</strong>",
-    };
-
-    sgMail.send(msg);
     app.listen(3000, () => {
       console.log("Server started");
     });

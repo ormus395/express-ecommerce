@@ -11,6 +11,8 @@ const User = database.define("user", {
   name: DataTypes.STRING,
   email: DataTypes.STRING,
   password: DataTypes.STRING,
+  passwordResetToken: DataTypes.STRING,
+  tokenExp: DataTypes.DATE,
 });
 
 module.exports = User;
