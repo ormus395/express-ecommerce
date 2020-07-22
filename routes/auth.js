@@ -14,13 +14,23 @@ router.get("/signup", authController.getSignup);
 router.post(
   "/signup",
   [
-    check("email").isEmail().withMessage("Please enter a valid email."),
-    body("confirmPassword")
+    check("email")
+      .isEmail()
+      .withMessage("Please enter a valid email.")
+      .normalizeEmail(),
+    check("password")
       .isLength({ min: 5 })
+      .withMessage("Password must be at least 5 characters long")
       .isAlphanumeric()
-      .withMessage(
-        "Password must be at least 5 characters long and be alphanumeric"
-      ),
+      .withMessage("Password must be alphanumeric.")
+      .trim(),
+    body("confirmPassword").custom((value, { req }) => {
+      if (value !== req.body.password) {
+        throw new Error("Passwords have to match!");
+      } else {
+        return true;
+      }
+    }),
   ],
   authController.postSignup
 );

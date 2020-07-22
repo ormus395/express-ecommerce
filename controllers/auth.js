@@ -103,6 +103,7 @@ exports.getSignup = (req, res, next) => {
     path: "/signup",
     pageTitle: "Signup",
     errorMessage: message,
+    errors: [],
   });
 };
 
@@ -111,15 +112,17 @@ exports.postSignup = (req, res, next) => {
   const email = req.body.email;
   const password = req.body.confirmPassword;
   const error = validationResult(req);
-  const message = error.array()[0].msg;
+  let message;
 
   console.log(error);
   if (!error.isEmpty()) {
+    message = error.errors[0].msg;
     return res.status(422).render("auth/signup", {
       path: "/signup",
       pageTitle: "Signup",
       errorMessage: message,
       successMessage: false,
+      errors: error.errors,
     });
   }
   bcrypt.hash(password, 12).then((hashed) => {
