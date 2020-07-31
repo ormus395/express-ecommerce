@@ -41,10 +41,13 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 const fileStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "images");
+    cb(null, "./images");
   },
   filename: (req, file, cb) => {
-    cb(null, new Date().toISOString() + "-" + file.originalname);
+    cb(
+      null,
+      new Date().toISOString().replace(/:/g, "-") + "-" + file.originalname
+    );
   },
 });
 const fileFilter = (req, file, cb) => {
@@ -58,11 +61,10 @@ const fileFilter = (req, file, cb) => {
     cb(null, false);
   }
 };
-app.use(
-  multer({ storage: fileStorage, fileFilter: fileFilter }).single("image")
-);
+app.use(multer({ storage: fileStorage }).single("image"));
 // to send a folder for the browser to access
 app.use(express.static(path.join(__dirname, "public")));
+app.use("/images", express.static(path.join(__dirname, "images")));
 
 // session middlware used to maintain user persistence on the server
 app.use(
@@ -112,6 +114,7 @@ app.use("/500", errorController.get500);
 app.use(errorController.get404);
 
 app.use((err, req, res, next) => {
+  console.log(err);
   res.status(500).render("500", {
     pageTitle: "Error",
     path: "/500",

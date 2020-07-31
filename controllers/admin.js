@@ -12,12 +12,15 @@ exports.getAddProduct = (req, res, next) => {
 };
 
 exports.postAddProduct = (req, res, next) => {
+  console.log("I was called to post a product");
   const errors = validationResult(req);
   const title = req.body.title;
-  const imageUrl = req.file;
+  const image = req.file;
   const price = req.body.price;
   const description = req.body.description;
-  console.log(imageUrl);
+  console.log(image);
+
+  const imageUrl = "/" + image.path;
   if (!errors.isEmpty()) {
     return res.status(400).render("admin/add-product", {
       pageTitle: "Add Product",
