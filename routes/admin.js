@@ -23,10 +23,6 @@ router.post(
       .withMessage("Your title needs to be between 5 and 255 characters.")
       .trim()
       .escape(),
-    body("imageUrl")
-      .isLength({ min: 0, max: 255 })
-      .withMessage("Your image url is too long")
-      .trim(),
     body("description")
       .not()
       .isEmpty()

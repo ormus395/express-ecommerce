@@ -6,7 +6,7 @@ const session = require("express-session");
 const SessionStore = require("connect-session-sequelize")(session.Store);
 const csurf = require("csurf");
 const flash = require("connect-flash");
-
+const multer = require("multer");
 //controller imports
 // error controller handles 404's for now
 const errorController = require("./controllers/error");
@@ -38,6 +38,29 @@ const OrderItem = require("./models/order-item");
 
 // set the body parser for parsing incoming requests
 app.use(bodyParser.urlencoded({ extended: false }));
+
+const fileStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "images");
+  },
+  filename: (req, file, cb) => {
+    cb(null, new Date().toISOString() + "-" + file.originalname);
+  },
+});
+const fileFilter = (req, file, cb) => {
+  if (
+    file.mimetype === "image/png" ||
+    file.mimetype === "image/jpg" ||
+    file.mimetype === "image/jpeg"
+  ) {
+    cb(null, true);
+  } else {
+    cb(null, false);
+  }
+};
+app.use(
+  multer({ storage: fileStorage, fileFilter: fileFilter }).single("image")
+);
 // to send a folder for the browser to access
 app.use(express.static(path.join(__dirname, "public")));
 

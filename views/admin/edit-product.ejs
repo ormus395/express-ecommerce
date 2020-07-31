@@ -10,7 +10,7 @@
         <div class="message message--error container"><%= errorMessage %></div>
     <%} %>
        <h3>Edit a product</h3>
-    <form class="product-form" action="/admin/edit-product/<%= product.id %>" method="POST">
+    <form class="product-form" action="/admin/edit-product/<%= product.id %>" method="POST" enctype="multipart/form-data">
         <div class="form-control">
             <label for="title">Title</label>
             <input 

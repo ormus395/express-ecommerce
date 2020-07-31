@@ -11,18 +11,22 @@
             <div class="message message--error container"><%= errorMessage %></div>
         <%} %>
         <h3>Add a product</h3>
-        <form class="product-form" action="/admin/add-product" method="POST">
+        <form class="product-form" action="/admin/add-product" method="POST" enctype="multipart/form-data">
             <div class="form-control">
                 <label for="title">Title</label>
                 <input 
                     class="<%= errors.find(e => e.param === 'title') ? 'invalid' : '' %>"
                     type="text" name="title" id="title">
             </div>
-            <div class="form-control">
+            <!--<div class="form-control">
                 <label for="imageUrl">Image URL</label>
                 <input 
                     class="<%= errors.find(e => e.param === 'imageUrl') ? 'invalid' : '' %>"
                     type="text" name="imageUrl" id="imageUrl">
+            </div> -->
+            <div class="form-control">
+                <label for="image">Image</label>
+                <input type="file" name="image" id="image">
             </div>
             <div class="form-control">
                 <label for="price">Price</label>

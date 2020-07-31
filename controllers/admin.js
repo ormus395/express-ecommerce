@@ -14,10 +14,10 @@ exports.getAddProduct = (req, res, next) => {
 exports.postAddProduct = (req, res, next) => {
   const errors = validationResult(req);
   const title = req.body.title;
-  const imageUrl = req.body.imageUrl;
+  const imageUrl = req.file;
   const price = req.body.price;
   const description = req.body.description;
-
+  console.log(imageUrl);
   if (!errors.isEmpty()) {
     return res.status(400).render("admin/add-product", {
       pageTitle: "Add Product",
