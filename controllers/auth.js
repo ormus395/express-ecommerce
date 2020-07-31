@@ -64,7 +64,9 @@ exports.postLogin = (req, res, next) => {
             }
           })
           .catch((err) => {
-            console.log(err);
+            const error = new Error(err);
+            error.httpStatusCode = 500;
+            return next(error);
           });
       } else {
         // user returned null, meaning no user was found with that email
@@ -76,7 +78,11 @@ exports.postLogin = (req, res, next) => {
         res.redirect("/login");
       }
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
 };
 
 exports.postLogout = (req, res, next) => {
@@ -125,39 +131,46 @@ exports.postSignup = (req, res, next) => {
       errors: error.errors,
     });
   }
-  bcrypt.hash(password, 12).then((hashed) => {
-    User.findOrCreate({
-      where: { email: email },
-      defaults: {
-        name: name,
-        email: email,
-        password: hashed,
-      },
-    }).then(([user, created]) => {
-      if (created) {
-        user.createCart();
-        req.flash("success", "User created successfully.");
-        const msg = {
-          to: user.email,
-          from: "jarecturner@gmail.com",
-          subject: "Thanks for joining NodeCommerce!",
-          html: `<strong>We hope you enjoy using our ecommerce platform ${user.name}!</strong>`,
-        };
+  bcrypt
+    .hash(password, 12)
+    .then((hashed) => {
+      User.findOrCreate({
+        where: { email: email },
+        defaults: {
+          name: name,
+          email: email,
+          password: hashed,
+        },
+      }).then(([user, created]) => {
+        if (created) {
+          user.createCart();
+          req.flash("success", "User created successfully.");
+          const msg = {
+            to: user.email,
+            from: "jarecturner@gmail.com",
+            subject: "Thanks for joining NodeCommerce!",
+            html: `<strong>We hope you enjoy using our ecommerce platform ${user.name}!</strong>`,
+          };
 
-        sgMail.send(msg).then(
-          () => {},
-          (error) => {
-            console.log(error);
-          }
-        );
-        res.redirect("/login");
-      } else {
-        console.log("User already exists");
-        req.flash("error", "Email already exists, please try again.");
-        res.redirect("/signup");
-      }
+          sgMail.send(msg).then(
+            () => {},
+            (error) => {
+              console.log(error);
+            }
+          );
+          res.redirect("/login");
+        } else {
+          console.log("User already exists");
+          req.flash("error", "Email already exists, please try again.");
+          res.redirect("/signup");
+        }
+      });
+    })
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
     });
-  });
 };
 
 exports.getReset = (req, res, next) => {
@@ -279,7 +292,9 @@ exports.getNewPassword = (req, res, next) => {
       });
     })
     .catch((err) => {
-      console.log(err);
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
     });
 };
 
@@ -306,7 +321,9 @@ exports.postNewPassword = (req, res, next) => {
         }
       })
       .catch((err) => {
-        console.log(err);
+        const error = new Error(err);
+        error.httpStatusCode = 500;
+        return next(error);
       });
   });
 };

@@ -40,6 +40,12 @@ exports.postAddProduct = (req, res, next) => {
       })
       .catch((err) => {
         console.log(err);
+        return res.status(500).render("admin/add-product", {
+          pageTitle: "Add Product",
+          path: "/admin/add-product",
+          errorMessage: "Database oeration failed. Please try again.",
+          errors: errors.array(),
+        });
       });
   }
 };
@@ -61,6 +67,11 @@ exports.getEditProduct = (req, res, next) => {
         errors: [],
         errorMessage: false,
       });
+    })
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
     });
 };
 
@@ -102,6 +113,19 @@ exports.postEditProduct = (req, res, next) => {
       })
       .catch((err) => {
         console.log(err);
+        return res.status(500).render("admin/edit-product", {
+          pageTitle: "Edit Product",
+          path: "/admin/edit-product",
+          errorMessage: "Database operation failed. Please try again.",
+          errors: errors.array(),
+          product: {
+            id: prodId,
+            title: updatedTitle,
+            imageUrl: updatedImage,
+            description: updatedDescription,
+            price: updatedPrice,
+          },
+        });
       });
   }
 };
@@ -117,15 +141,26 @@ exports.deleteProduct = (req, res, next) => {
       console.log(result);
       res.redirect("/admin/products");
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
 };
 
 exports.getProducts = (req, res, next) => {
-  req.user.getProducts().then((products) => {
-    res.render("admin/products", {
-      prods: products,
-      pageTitle: "Admin Products",
-      path: "/admin/products",
+  req.user
+    .getProducts()
+    .then((products) => {
+      res.render("admin/products", {
+        prods: products,
+        pageTitle: "Admin Products",
+        path: "/admin/products",
+      });
+    })
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
     });
-  });
 };

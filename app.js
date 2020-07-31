@@ -63,12 +63,14 @@ app.use((req, res, next) => {
   } else {
     User.findByPk(req.session.user.id)
       .then((user) => {
+        if (!user) {
+          return next();
+        }
         req.user = user;
         next();
       })
       .catch((err) => {
-        console.log("Error");
-        next(err);
+        throw new Error(err);
       });
   }
 });
@@ -83,7 +85,16 @@ app.use("/admin", adminRoutes);
 app.use(shopRoutes);
 app.use(authRoutes);
 
+app.use("/500", errorController.get500);
 app.use(errorController.get404);
+
+app.use((err, req, res, next) => {
+  res.status(500).render("500", {
+    pageTitle: "Error",
+    path: "/500",
+    isAuthenticated: req.isLoggedIn,
+  });
+});
 
 Product.belongsTo(User, { constraints: true, onDelete: "CASCADE" });
 User.hasMany(Product);
