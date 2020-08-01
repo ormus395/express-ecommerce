@@ -14,11 +14,12 @@
                             <ul>
                                 <ul>
                                     <% order.products.forEach(function(item){ %>
-                                        <li><%= item.title %></li>
+                                        <li><%= item.title %> </li>
                                     <% }); %>
                                 </ul>
                             </ul>
                         </li>
+                        <a target="_blank" href="/orders/<%= order.id %>">Invoice</a>
                     <% }); %>
                 </ul>
             <% } %>

@@ -1,6 +1,11 @@
+const path = require("path");
+const fs = require("fs");
+
+const PDFDocument = require("pdfkit");
 const Product = require("../models/product");
 const Cart = require("../models/cart");
 const User = require("../models/user");
+const Order = require("../models/order");
 
 exports.getProducts = (req, res, next) => {
   Product.findAll()
@@ -180,5 +185,57 @@ exports.getOrders = (req, res, next) => {
     })
     .catch((err) => {
       console.log(err);
+    });
+};
+
+exports.getInvoice = (req, res, next) => {
+  const orderId = req.params.orderId;
+  const invoicename = "invoice-" + orderId + ".pdf";
+  const invoicePath = path.join("data", "invoices", invoicename);
+
+  Order.findByPk(orderId)
+    .then((order) => {
+      if (!order) {
+        next(new Error("Order was not found."));
+      } else {
+        if (order.dataValues.userId !== req.user.id) {
+          next(new Error("Order was not found"));
+        } else {
+          res.setHeader("Content-Type", "application/pdf");
+          res.setHeader(
+            "Content-Disposition",
+            'inline; filename="' + invoicename + '"'
+          );
+          order.getOrderItems().then((orderItems) => {
+            console.log(orderItems);
+          });
+          order.getProducts().then((products) => {
+            console.log(products);
+            let items = products.map((p) => {
+              return {
+                title: p.dataValues.title,
+                price: p.dataValues.price,
+              };
+            });
+
+            console.log(items);
+            const doc = new PDFDocument();
+            doc.pipe(fs.createWriteStream(invoicePath));
+            doc.pipe(res);
+
+            doc.font("Helvetica-Bold").text("Invoice", { align: "center" });
+
+            items.forEach((item) => {
+              doc.moveDown();
+              doc.font("Helvetica").text(item.title + ": $" + item.price);
+            });
+
+            doc.end();
+          });
+        }
+      }
+    })
+    .catch((err) => {
+      next(err);
     });
 };
