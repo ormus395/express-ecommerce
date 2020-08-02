@@ -38,6 +38,7 @@ const OrderItem = require("./models/order-item");
 
 // set the body parser for parsing incoming requests
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
 const fileStorage = multer.diskStorage({
   destination: (req, file, cb) => {

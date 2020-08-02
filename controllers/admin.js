@@ -173,3 +173,28 @@ exports.getProducts = (req, res, next) => {
       return next(error);
     });
 };
+
+exports.delete = (req, res, next) => {
+  let id = req.body.id;
+
+  Product.findByPk(id)
+    .then((product) => {
+      deleteFile(product.dataValues.imageUrl);
+      Product.destroy({
+        where: {
+          id: req.body.id,
+          userId: req.user.id,
+        },
+      }).then((result) => {
+        console.log("destroy", result);
+        res
+          .status(200)
+          .json({ success: true, message: "Product deleted successfully." });
+      });
+    })
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
+};
