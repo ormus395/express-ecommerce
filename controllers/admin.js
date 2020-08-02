@@ -1,4 +1,5 @@
 const { validationResult } = require("express-validator");
+const deleteFile = require("../util/file");
 const Product = require("../models/product");
 const User = require("../models/user");
 
@@ -83,8 +84,9 @@ exports.postEditProduct = (req, res, next) => {
   const prodId = req.body.id;
   const updatedTitle = req.body.title;
   const updatedPrice = req.body.price;
-  const updatedImage = req.body.imageUrl;
+  const updatedImage = req.file;
   const updatedDescription = req.body.description;
+  const imageUrl = "/" + updatedImage.path;
 
   if (!errors.isEmpty()) {
     return res.status(400).render("admin/edit-product", {
@@ -95,7 +97,6 @@ exports.postEditProduct = (req, res, next) => {
       product: {
         id: prodId,
         title: updatedTitle,
-        imageUrl: updatedImage,
         description: updatedDescription,
         price: updatedPrice,
       },
@@ -106,9 +107,12 @@ exports.postEditProduct = (req, res, next) => {
         if (req.user.id !== result.userId) {
           return res.redirect("/");
         }
+
+        deleteFile(result.dataValues.imageUrl);
+
         result.title = updatedTitle;
         result.price = updatedPrice;
-        result.imageUrl = updatedImage;
+        result.imageUrl = imageUrl;
         result.description = updatedDescription;
         return result.save().then((result) => {
           res.redirect("/admin/products");
@@ -124,7 +128,6 @@ exports.postEditProduct = (req, res, next) => {
           product: {
             id: prodId,
             title: updatedTitle,
-            imageUrl: updatedImage,
             description: updatedDescription,
             price: updatedPrice,
           },
@@ -134,15 +137,18 @@ exports.postEditProduct = (req, res, next) => {
 };
 
 exports.deleteProduct = (req, res, next) => {
-  Product.destroy({
-    where: {
-      id: req.body.id,
-      userId: req.user.id,
-    },
-  })
-    .then((result) => {
-      console.log(result);
-      res.redirect("/admin/products");
+  Product.findByPk(req.body.id)
+    .then((product) => {
+      deleteFile(product.dataValues.imageUrl);
+      Product.destroy({
+        where: {
+          id: req.body.id,
+          userId: req.user.id,
+        },
+      }).then((result) => {
+        console.log("destroy", result);
+        res.redirect("/admin/products");
+      });
     })
     .catch((err) => {
       const error = new Error(err);

@@ -6,6 +6,9 @@ const Product = require("../models/product");
 const Cart = require("../models/cart");
 const User = require("../models/user");
 const Order = require("../models/order");
+const { off } = require("pdfkit");
+
+const ITEMS_PER_PAGE = 2;
 
 exports.getProducts = (req, res, next) => {
   Product.findAll()
@@ -39,20 +42,35 @@ exports.getProduct = (req, res, next) => {
 };
 
 exports.getIndex = (req, res, next) => {
+  const page = +req.query.page || 1;
+  const offset = (page - 1) * ITEMS_PER_PAGE;
+  let total;
   let message = req.flash("success");
   if (message) {
     message = message[0];
   } else {
     message = false;
   }
-  Product.findAll().then((products) => {
-    res.render("shop/index", {
-      prods: products,
-      pageTitle: "Shop",
-      path: "/",
-      successMessage: message,
-    });
-  });
+
+  Product.findAndCountAll({ limit: ITEMS_PER_PAGE, offset: offset })
+    .then((data) => {
+      total = data.count;
+
+      res.render("shop/index", {
+        prods: data.rows,
+        pageTitle: "Shop",
+        path: "/",
+        successMessage: message,
+        currentPage: page,
+        total: total,
+        hasNextPage: ITEMS_PER_PAGE * page < total,
+        hasPreviousPage: page > 1,
+        nextPage: page + 1,
+        previousPage: page - 1,
+        lastPage: Math.ceil(total / ITEMS_PER_PAGE),
+      });
+    })
+    .catch((err) => next(err));
 };
 
 exports.getCart = (req, res, next) => {
@@ -206,9 +224,6 @@ exports.getInvoice = (req, res, next) => {
             "Content-Disposition",
             'inline; filename="' + invoicename + '"'
           );
-          order.getOrderItems().then((orderItems) => {
-            console.log(orderItems);
-          });
           order.getProducts().then((products) => {
             console.log(products);
             let items = products.map((p) => {
